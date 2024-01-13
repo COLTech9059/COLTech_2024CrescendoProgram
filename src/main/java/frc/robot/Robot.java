@@ -44,6 +44,7 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
 
     DriveTrain.encoderMath();
+    Manipulator.manipulatorDashboard();
 
     // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
     // commands, running already-scheduled commands, removing finished or interrupted commands,

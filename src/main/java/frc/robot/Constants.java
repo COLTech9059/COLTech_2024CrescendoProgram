@@ -24,7 +24,7 @@ public final class Constants {
  public static int leftBaseID = 6;
  public static int rightBaseID = 7;
  public static int ampID = 8;
- public static int shooterID = 9;
+ public static int intakeID = 9;
  
  //Digital inputs DIO ports
  public static int beamSensorID = 0;
