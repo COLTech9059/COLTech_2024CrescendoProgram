@@ -73,7 +73,6 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    Manipulator.resetEncoders();
 
     DriveTrain.autoDrive(0.3,24);
   }
@@ -93,6 +92,9 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     DriveTrain.drive();
+
+    Manipulator.controlManipulator();
+
   }
 
   @Override
