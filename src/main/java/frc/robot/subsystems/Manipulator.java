@@ -139,7 +139,7 @@ public class Manipulator {
         //#MOVEMANIPULATOR
         //This method will move the manipulator forward
         public static void moveManipulator() {
-            if (IO.dController.getRightTriggerAxis() > 30) {
+            if (IO.dController.getRightTriggerAxis() > 0.4) {
                 rightBaseMotor.set(0.3);
             } else {
                 rightBaseMotor.set(0);
@@ -151,7 +151,7 @@ public class Manipulator {
         public static void controlManipulator() {
 
             if (IO.dController.getXButton()) intake();
-            if (IO.dController.getRightTriggerAxis() > 30) moveManipulator();
+            if (IO.dController.getRightTriggerAxis() > 0.4) moveManipulator();
             if (IO.dController.getYButton()) ampPosition();
             if (IO.dController.getRightBumper()) ampScore();
             if (IO.dController.getLeftBumper()) shootNote();
