@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.IO;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 
 public class Manipulator {
@@ -22,6 +23,10 @@ public class Manipulator {
     static RelativeEncoder rightBaseEncoder = rightBaseMotor.getEncoder();
     static RelativeEncoder ampEncoder = ampMotor.getEncoder();
     static RelativeEncoder shooterEncoder = shooterMotor.getEncoder();
+
+    //Create the digital input objects
+    static DigitalInput beamSensor = new DigitalInput(Constants.beamSensorID);
+    static DigitalInput magneticSensor = new DigitalInput(Constants.magneticSensorID);
 
     //#INITIALIZEMANIPULATOR
     //This method will set up the manipulator for use
@@ -66,4 +71,10 @@ public class Manipulator {
             isReset = true;
         }
     }
+        //#MANIPULATORDASHBOARD
+        //This method updates the dashboard with all the data from the manipulator class
+        public static void manipulatorDashboard() {
+            SmartDashboard.putBoolean("Beam Sensor", beamSensor.get());
+            SmartDashboard.putBoolean("Magnetic Sensor", magneticSensor.get());
+        }
 }
