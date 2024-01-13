@@ -31,6 +31,7 @@ public class Robot extends TimedRobot {
       Manipulator.autoManipulator(true, true, false, false);
       DriveTrain.autoDrive(0.3, 24);
       Manipulator.autoManipulator(false, true, true, false);
+      DriveTrain.autoDrive(0.3, 36);
     }
   }
   /**
