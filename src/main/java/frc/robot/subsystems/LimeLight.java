@@ -41,7 +41,7 @@ public class LimeLight {
         this.currentX = tx.getDouble(0.0);
         this.currentY = ty.getDouble(0.0);
         this.currentArea = ta.getDouble(0.0);
-        this.seesTarget = tv.getBoolean(false)
+        this.seesTarget = tv.getDouble(0.0);
         //Make them visible (via SmartDashboard)
         SmartDashboard.putNumber("LimelightX", currentX);
         SmartDashboard.putNumber("LimelightY", currentY);
@@ -78,7 +78,7 @@ public class LimeLight {
         double distError = desiredDist - currentDist; //Distance from desired point. Calculated in Inches.
 
         while (distError > .5 || distError < -.5){
-            double drivingAdjust  = (correctionMod * distError) * .1; //Basically designates speed.
+            double drivingAdjust  = (correctionMod * distError) * .1; //% of angle (i think)
             double speed = .7;
             if (drivingAdjust > 0)
                 speed = .7;
@@ -104,7 +104,7 @@ public class LimeLight {
             steeringPow = .3;
             driveTrain.HamsterDrive.arcadeDrive(0, steeringPow);
         }
-        while (currentX > .5 || currentX < .5){
+        while (currentX > .5 || currentX < -.5){
             if (currentX > 0)
                 steeringPow = .3;
             else if (currentX < 0)
