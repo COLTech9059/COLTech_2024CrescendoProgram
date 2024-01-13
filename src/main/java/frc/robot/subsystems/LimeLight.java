@@ -57,20 +57,35 @@ public class LimeLight {
     }
     //#GETINRANGE
     /* Auto-Function that allows the robot to get in range of a given target (currently target ID 1).
-     * Not fully optimized currently, slows as you get closer.
+     * THEORETICALLY should work. At times turnPower is greater than 1 (See simulation), which may cause problems.
      */
+    /*TESTING VALUES:
+        currentX = 11
+
+        desiredDist = 36 (inches)
+        currentDist = 70 (inches)
+        distError = 36 - 70 (-34)
+        drivingAdjust = (-.1 * -34) (3.4) * .1 = .34
+        turnPower = (11 * .7) = ((7.7) * .34) = 2.618
+
+    */
+
     public boolean getInRange(DriveTrain driveTrain){
         double currentDist = estimateDist();
-        double distError = desiredDist - currentDist; //Distance from desired point.
+        double distError = desiredDist - currentDist; //Distance from desired point. Calculated in Inches.
 
         while (distError > .5 || distError < -.5){
-            double drivingAdjust  = (correctionMod * distError) * .8; //Basically designates speed.
-            if (drivingAdjust < -.5)
-                drivingAdjust = -.5;
-            else if (drivingAdjust < .5)
-                drivingAdjust = .5;
-            double turnPower = currentX / 10.0;
-            driveTrain.HamsterDrive.arcadeDrive(drivingAdjust, turnPower);
+            double drivingAdjust  = (correctionMod * distError) * .1; //Basically designates speed.
+            double speed = .7;
+            if (drivingAdjust > 0)
+                speed = .7;
+            else if (drivingAdjust < 0)
+                speed = -.7;
+            //Cap turn power at 70% of value
+            double turnPower = (currentX * 0.7) * drivingAdjust; 
+            driveTrain.HamsterDrive.arcadeDrive(speed, turnPower);
+
+            distError = desiredDist - estimateDist(); //Distance from desired point.
         }
 
         return true;
