@@ -146,6 +146,18 @@ public class Manipulator {
             }
         }
 
+        //#MOVEMANIPULATOR
+        //This method will move the manipulator forward by a set time
+        public static void moveManipulator(double moveTime) {
+            
+            Timer moveTimer = new Timer();
+            if (moveTimer.get() <= moveTime) {
+                rightBaseMotor.set(0.3);
+            } else {
+                rightBaseMotor.set(0);
+            }
+        }
+
         //#CONTROLMANIPULATOR
         //This method will add keybinds for all the control methods in the manipulator class
         public static void controlManipulator() {
@@ -156,5 +168,19 @@ public class Manipulator {
             if (IO.dController.getRightBumper()) ampScore();
             if (IO.dController.getLeftBumper()) shootNote();
 
+        }
+
+
+
+        //#AUTOMANIPULATOR
+        //This method will do all of the actions for our manipulator during auto
+        public static void autoManipulator(boolean doesIntake, boolean doesAim, boolean doesShoot, boolean doesAmp) {
+            if (doesIntake) {
+                moveManipulator(1.5);
+                intake();
+            }
+            if (doesAim) ampPosition();
+            if (doesShoot) shootNote();
+            if (doesAmp) ampScore();
         }
 }
