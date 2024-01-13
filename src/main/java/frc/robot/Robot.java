@@ -12,6 +12,7 @@ import frc.robot.subsystems.Manipulator;
 
 
 
+
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
  * each mode, as described in the TimedRobot documentation. If you change the name of this class or
@@ -21,6 +22,18 @@ import frc.robot.subsystems.Manipulator;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
+  //#AUTOMODE
+  //This function selects which auto to use based on a number input
+  public static void autoMode(int autoSelector) {
+    if (autoSelector == 1) {
+      Manipulator.autoManipulator(false, true, true, false);
+      DriveTrain.autoDrive(0.3, 24);
+      Manipulator.autoManipulator(true, true, false, false);
+      DriveTrain.autoDrive(0.3, 24);
+      Manipulator.autoManipulator(false, true, true, false);
+      DriveTrain.autoDrive(0.3, 36);
+    }
+  }
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -73,8 +86,8 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
+    autoMode(1);
 
-    DriveTrain.autoDrive(0.3,24);
   }
 
   @Override
