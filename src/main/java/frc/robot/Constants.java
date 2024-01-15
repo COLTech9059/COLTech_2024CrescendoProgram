@@ -29,4 +29,7 @@ public final class Constants {
  //Digital inputs DIO ports
  public static int beamSensorID = 0;
  public static int magneticSensorID = 1;
+
+ //Miscellaneus manipulator IDs
+ public static int shootPosition = 2;
 }

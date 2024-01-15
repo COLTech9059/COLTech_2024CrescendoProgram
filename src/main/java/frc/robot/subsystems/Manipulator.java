@@ -67,6 +67,17 @@ public class Manipulator {
 
 
 
+    //#SHOOTPOSITION
+    //This method will bring the manipulator to a position for it to shoot from
+    public static void shootPosition() {
+        if (rightBaseEncoder.getPosition() <= Constants.shootPosition) {
+            rightBaseMotor.set(0.3);
+        } else {
+            rightBaseMotor.set(0);
+        }
+    }
+
+
         //#MANIPULATORDASHBOARD
         //This method updates the dashboard with all the data from the manipulator class
         public static void manipulatorDashboard() {
