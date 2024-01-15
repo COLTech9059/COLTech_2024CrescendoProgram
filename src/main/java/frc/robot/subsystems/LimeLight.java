@@ -12,10 +12,12 @@ public class LimeLight {
     private final NetworkTableEntry tx = nTable.getEntry("tx");
     private final NetworkTableEntry ty = nTable.getEntry("ty");
     private final NetworkTableEntry ta = nTable.getEntry("ta");
+    private final NetworkTableEntry tv = nTable.getEntry("tv");
 
     private double currentX; // X value is horizontal angle from center of LL camera
     private double currentY; // Y value is vertical angle from center of LL camera
     private double currentArea; // Unknown what this does currently.
+    private double seesTarget;
 
     //CONSTANTS
     //Physical distance of limelight LENS from ground (measured in INCHES)
@@ -31,7 +33,7 @@ public class LimeLight {
     //Could put it in an array and designate it to an AprilTag.
     private final double desiredDist = 36.0;
 
-    //# LIMELIGHT
+    //#LIMELIGHT
     /* Constructor. Assigns values to the coordinate variables above.
     */
     public LimeLight(){
@@ -39,10 +41,12 @@ public class LimeLight {
         this.currentX = tx.getDouble(0.0);
         this.currentY = ty.getDouble(0.0);
         this.currentArea = ta.getDouble(0.0);
+        this.seesTarget = tv.getDouble(0.0);
         //Make them visible (via SmartDashboard)
         SmartDashboard.putNumber("LimelightX", currentX);
         SmartDashboard.putNumber("LimelightY", currentY);
         SmartDashboard.putNumber("LimelightArea", currentArea);
+        SmartDashboard.putNumber("LimeLightSeesTarget", seesTarget);
     }
     //#ESTIMATEDIST
     /* Does math to estimate the distance from the limelight to the target.
@@ -69,13 +73,12 @@ public class LimeLight {
         turnPower = (11 * .7) = ((7.7) * .34) = 2.618
 
     */
-
     public boolean getInRange(DriveTrain driveTrain){
         double currentDist = estimateDist();
         double distError = desiredDist - currentDist; //Distance from desired point. Calculated in Inches.
 
         while (distError > .5 || distError < -.5){
-            double drivingAdjust  = (correctionMod * distError) * .1; //Basically designates speed.
+            double drivingAdjust  = (correctionMod * distError) * .1; //% of angle (i think)
             double speed = .7;
             if (drivingAdjust > 0)
                 speed = .7;
@@ -88,6 +91,27 @@ public class LimeLight {
             distError = desiredDist - estimateDist(); //Distance from desired point.
         }
 
+        return true;
+    }
+    /*#SEEKTARGET
+     * Turns the robot until the limelight catches a glimpse of the target
+     * On the robot seeing it, centers on the target with a .5 degree range of error.
+     * Unknown which way the directions are.
+     */
+    public boolean seekTarget(DriveTrain driveTrain){
+        double steeringPow = .3;
+        while (seesTarget == 0.0){
+            steeringPow = .3;
+            driveTrain.HamsterDrive.arcadeDrive(0, steeringPow);
+        }
+        while (currentX > .5 || currentX < -.5){
+            if (currentX > 0)
+                steeringPow = .3;
+            else if (currentX < 0)
+                steeringPow = -.3;
+            driveTrain.HamsterDrive.arcadeDrive(0, steeringPow);
+        }
+        driveTrain.HamsterDrive.arcadeDrive(0, 0);
         return true;
     }
 
