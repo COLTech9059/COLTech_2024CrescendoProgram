@@ -59,6 +59,8 @@ public class Manipulator {
             rightBaseMotor.set(-0.3);
         } else if (magneticSensor.get()) {
             rightBaseMotor.set(0);
+            rightBaseEncoder.setPosition(0);
+            leftBaseEncoder.setPosition(0);
         }
 
     }
