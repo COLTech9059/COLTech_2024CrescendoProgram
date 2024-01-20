@@ -20,26 +20,29 @@ public class LimeLight {
     private double seesTarget; //Double value (only 1 or 0) that tells the program if it sees the target.
 
     private double estimDist = 0.0;
+    private double showTurnPower = 0.0;
     //BOOLEANS
     private boolean enabled = false;
     private boolean targetFound = false;
+    private boolean inPosition = false;
     //TIMERS
     private final Timer seekTimer = new Timer();
     private final Timer driveTimer = new Timer();
+    private final Timer refreshTimer = new Timer();
 
     //CONSTANTS
     //Physical distance of limelight LENS from ground (measured in INCHES)
-    private final double LensDistFromGround = 10.75;
+    private final double LensDistFromGround = 11.25;
     //Physical vertical angle of lens from mount (measured in DEGREES).
-    private final double LensAngleFromMount = 93.57;
+    private final double LensAngleFromMount = 45.0;
     //Physical height of chosen AprilTag.
     //If needed, create a table that holds the AprilTag IDs and its height from the ground.
-    private final double targetHeight = 32.0;
+    private final double targetHeight = 53.88;
     //Correction modifier. I assume it designates how much of a correction you want.
-    private final double correctionMod = -1;
+    private final double correctionMod = -.1;
     //Preset distance from target.
     //Could put it in an array and designate it to an AprilTag.
-    private final double desiredDist = 24.0;
+    private final double desiredDist = 36.0;
 
     //#LIMELIGHT
     /* Constructor. Assigns values to the coordinate variables above.
@@ -80,8 +83,11 @@ public class LimeLight {
         seekTimer.reset();
         driveTimer.stop();
         driveTimer.reset();
+        refreshTimer.stop();
+        refreshTimer.reset();
         enabled = false;
         targetFound = false;
+        inPosition = false;
     }
     //#START
     /*Enables the limelight.
@@ -89,50 +95,66 @@ public class LimeLight {
      */
     public void start(){
         enabled = true;
+        targetFound = false;
+        inPosition = false;
     }
-    //#GETINRANGE
-    /* Auto-Function that allows the robot to get in range of a given target (currently target ID 1).
-     * THEORETICALLY should work.
+    //#GETINRANGEUSINGAREA
+    /*An alternative to getInRangeUsingDistance. 
+     * Approaches the target using the total area taken rather than a set distance.
+     * Used for getting rough approaches.
      */
-    /*TESTING VALUES:
-        currentX = 11
-
-        desiredDist = 24 (inches)
-        currentDist = 70 (inches)
-        distError = 24 - 70 (-46)
-        drivingAdjust = (-1 * -34) (-34) * .01 = .034
-        turnPower = (5 * .7) = ((3.5) * .034) = .119
-
-    */
-    public void getInRange(DriveTrain driveTrain){
+    public void getInRangeUsingArea(DriveTrain driveTrain){
         if(driveTimer.get() > 3.0 && seesTarget == 0.0){
             driveTrain.HamsterDrive.arcadeDrive(0, 0);
             stop();
         }
+         if (enabled){
+            if (driveTimer.get() == 0.0 && targetFound) {driveTimer.start(); refreshTimer.start();}
+            if (driveTimer.get() > 0.0){
+                if (currentArea <= 15.0){
+                    double speed = -.35;
+                    driveTrain.HamsterDrive.arcadeDrive(speed, 0);
+                } else {
+                    driveTrain.HamsterDrive.arcadeDrive(0, 0);
+                    stop();
+                }
+            }
+        }  
+    }
+    //#GETINRANGEUSINGDISTANCE
+    /* Allows the robot to precisely get in range of a target.
+     * THEORETICALLY should work.
+     */
+    public void getInRangeUsingDistance(DriveTrain driveTrain){
+        if(driveTimer.get() > 3.0 && refreshTimer.get() > 3.0){
+            driveTrain.HamsterDrive.arcadeDrive(0, 0);
+            stop();
+        }
         if (enabled){
-            // postValues();
-            if (driveTimer.get() == 0.0 && targetFound) driveTimer.start();
+            if (driveTimer.get() == 0.0 && targetFound) {driveTimer.start(); refreshTimer.start();}
             if (driveTimer.get() > 0.0){
                 //Estimate distance from target and the distance error.
                 double currentDist = estimateDist();
                 double distError = desiredDist - currentDist; //Distance from desired point. Calculated in Inches.
                 if (distError > 1 || distError < -1){
+                    refreshTimer.reset();
+                    refreshTimer.start();
                     //Calculate driving adjust percentage for turning.
-                    double drivingAdjust  = (correctionMod * distError) * .001; //% of angle (i think)
-                    double speed = .5;
+                    double drivingAdjust  = (correctionMod * distError) * .1; //% of angle (i think)
+                    double speed = -.45;
                     if (drivingAdjust > 0)
-                        speed = .5;
+                        speed = -.45;
                     else if (drivingAdjust < 0)
-                        speed = -.5;
+                        speed = .45;
                     //Cap turn power at 70% of value
-                    double turnPower = (this.currentX * 0.7) * drivingAdjust; 
-                    if (turnPower > .7)
-                        turnPower = .7;
-                    else if (turnPower < -.7)
-                        turnPower = -.7;
+                    double turnPower = -Math.pow((this.currentX*.1), 3);
+                    // double turnPower = -.35;  
+                    if (turnPower < -.35)
+                        turnPower = -.35;
+                    else if (turnPower > .35)
+                        turnPower = .35;
+                    showTurnPower = turnPower;
                     driveTrain.HamsterDrive.arcadeDrive(speed, turnPower);
-                    //Recalculate.
-                    distError = desiredDist - this.estimateDist(); //Distance from desired point.
                 } else {
                     driveTrain.HamsterDrive.arcadeDrive(0, 0);
                     stop();
@@ -152,23 +174,24 @@ public class LimeLight {
             stop();
         }
         if (enabled) {
-           if (seekTimer.get() <= 0.0) seekTimer.start();
-           if (seekTimer.get() > 0.0){
+           if (seekTimer.get() <= 0.0 && !targetFound) seekTimer.start();
+           if (seekTimer.get() > 0.0 && !targetFound){
             //If target isn't in view, set steeringPow to be a consistent .3. 
                 if (seesTarget == 0.0){
-                    steeringPow = .3;
+                    steeringPow = .4;
                     driveTrain.HamsterDrive.arcadeDrive(0, steeringPow);
                 } else {
                     //Else if it is visible then...
                     //Runs if it is not in the threshold.
-                    if (currentX > .5 || currentX < -.5){
-                        if (currentX > 0) steeringPow = -.3;
-                        else if (currentX < 0) steeringPow = .3;
+                    if ((currentX > 5.0 || currentX < -5.0) && seesTarget != 0.0){
+                        if (currentX > 0.0) steeringPow = -.35;
+                        else if (currentX < 0.0) steeringPow = .35;
                         driveTrain.HamsterDrive.arcadeDrive(0, steeringPow);
-                    } else {
+                    } else if ((currentX < 5 && currentX > -5) && seesTarget != 0.0){
                         //We have found the target. Stop turning.
                         driveTrain.HamsterDrive.arcadeDrive(0, 0);
                         seekTimer.stop();
+                        seekTimer.reset();
                         targetFound = true;
                     }
                 }
@@ -187,5 +210,6 @@ public class LimeLight {
         SmartDashboard.putNumber("LimelightArea", this.currentArea);
         SmartDashboard.putNumber("LimeLightSeesTarget", this.seesTarget);
         SmartDashboard.putNumber("DistFromTarget", estimDist);
+        SmartDashboard.putNumber("TurnPowerAdjust", showTurnPower);
     }
 }
