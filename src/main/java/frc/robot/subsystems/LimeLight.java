@@ -133,12 +133,14 @@ public class LimeLight {
         if (enabled){
             if (driveTimer.get() == 0.0 && targetFound) {driveTimer.start(); refreshTimer.start();}
             if (driveTimer.get() > 0.0){
+                if(seesTarget == 1.0){
+                    refreshTimer.reset();
+                    refreshTimer.start();
+                }
                 //Estimate distance from target and the distance error.
                 double currentDist = estimateDist();
                 double distError = desiredDist - currentDist; //Distance from desired point. Calculated in Inches.
                 if (distError > 1 || distError < -1){
-                    refreshTimer.reset();
-                    refreshTimer.start();
                     //Calculate driving adjust percentage for turning.
                     double drivingAdjust  = (correctionMod * distError) * .1; //% of angle (i think)
                     double speed = -.45;
@@ -146,9 +148,8 @@ public class LimeLight {
                         speed = -.45;
                     else if (drivingAdjust < 0)
                         speed = .45;
-                    //Cap turn power at 70% of value
+                    //Cap turn power at 35% of value
                     double turnPower = -Math.pow((this.currentX*.1), 3);
-                    // double turnPower = -.35;  
                     if (turnPower < -.35)
                         turnPower = -.35;
                     else if (turnPower > .35)
