@@ -31,15 +31,15 @@ public class LimeLight {
     private final Timer seekTimer = new Timer();
     private final Timer driveTimer = new Timer();
     private final Timer refreshTimer = new Timer();
-    //HEIGHTS                             ID 1   ID 2 ID 3 ID 4 ID 5 ID 6 ID 7 
+    //HEIGHTS                                     ID 1   ID 2 ID 3 ID 4 ID 5 ID 6    ID 7 
     //ID #s are the number minus 1.
-    private final double[] heightArray = {53.88, 0.0, 0.0, 0.0, 0.0, 53.88, 53.88};
+    private final double[] heightArray = {50.125, 53.88, 0.0, 0.0, 0.0, 0.0, 50.125, 53.88};
 
     //CONSTANTS
     //Physical distance of limelight LENS from ground (measured in INCHES)
     private final double LensDistFromGround = 11.25;
     //Physical vertical angle of lens from mount (measured in DEGREES).
-    private final double LensAngleFromMount = 45.0;
+    private final double LensAngleFromMount = 41.9;
     //Physical height of chosen AprilTag.
     //If needed, create a table that holds the AprilTag IDs and its height from the ground.
     // private final double targetHeight = 53.88;
@@ -73,9 +73,11 @@ public class LimeLight {
     /* Does math to estimate the distance from the limelight to the target.
         Assumes that robot is centered on target.
      */
-    public double estimateDist(double targetHeight){
-        if (curTargetID > 0.0){
-            targetHeight = heightArray[((int) curTargetID)-1];
+    private double targetHeight = 0.0;
+    public double estimateDist(){
+        int tempID = (int) curTargetID;
+        if (tempID > 0.0){
+            targetHeight = heightArray[tempID];
         }
         double radAngle = Math.toRadians(this.currentY + LensAngleFromMount);
 
@@ -135,7 +137,8 @@ public class LimeLight {
     /* Allows the robot to precisely get in range of a target.
      * THEORETICALLY should work.
      */
-    public void getInRangeUsingDistance(DriveTrain driveTrain, double targetHeight){
+    private double speed = .45;
+    public void getInRangeUsingDistance(DriveTrain driveTrain){
         if(driveTimer.get() > 3.0 && refreshTimer.get() > 3.0){
             driveTrain.HamsterDrive.arcadeDrive(0, 0);
             stop();
@@ -148,12 +151,11 @@ public class LimeLight {
                     refreshTimer.start();
                 }
                 //Estimate distance from target and the distance error.
-                double currentDist = estimateDist(targetHeight);
+                double currentDist = estimateDist();
                 double distError = desiredDist - currentDist; //Distance from desired point. Calculated in Inches.
-                if (distError > 1 || distError < -1){
+                if (distError > 2.5 || distError < -2.5){
                     //Calculate driving adjust percentage for turning.
                     double drivingAdjust  = ((correctionMod * distError) * .1); //% of angle (i think)
-                    double speed = .45;
                     //Cap the speed at 45% and set the floor at 25%
                     if (drivingAdjust > 0) speed = -.45;
                     else if (drivingAdjust < 0) speed = .45;
